@@ -85,7 +85,7 @@ internal class EditorPLA : EditorBase
         var pt = Data.PersonalData;
         var hasForm = new HashSet<int>();
         var banned = new HashSet<int>();
-        foreach (var pi in pt.Table.Cast<IPersonalMisc_1>())
+        foreach (var pi in pt.Table.Cast<IPersonalMisc_SWSH>())
         {
             if (pi.IsPresentInGame)
             {
@@ -103,7 +103,7 @@ internal class EditorPLA : EditorBase
     public int GetRandomForm(int spec)
     {
         var pt = Data.PersonalData;
-        var formRand = pt.Table.Cast<IPersonalMisc_1>()
+        var formRand = pt.Table.Cast<IPersonalMisc_SWSH>()
             .Where(z => z.IsPresentInGame && !(Legal.BattleExclusiveForms.Contains(z.DexIndexNational) || Legal.BattleFusions.Contains(z.DexIndexNational)))
             .GroupBy(z => z.DexIndexNational)
             .ToDictionary(z => z.Key, z => z.ToList());
@@ -780,11 +780,11 @@ internal class EditorPLA : EditorBase
             addEntryCallback: x => x.AddEntry());
     }
 
-    [EditorCallable(EditorCategory.Misc, true)]
-    public void EditPokedexFormStorage()
-    {
-        //PopFlat<PokedexRankTable, PokedexRankLevel>(GameFile.DexFormStorage, "Pokedex Form Storage Editor", z => z.Rank.ToString());
-    }
+    //[EditorCallable(EditorCategory.Misc, true)]
+    //public void EditPokedexFormStorage()
+    //{
+    //    //PopFlat<PokedexRankTable, PokedexRankLevel>(GameFile.DexFormStorage, "Pokedex Form Storage Editor", z => z.Rank.ToString());
+    //}
 
     [EditorCallable(EditorCategory.Misc, true)]
     public void EditPokeDefaultLocator()
