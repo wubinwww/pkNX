@@ -23,21 +23,21 @@ public class ReadOnlyFileSystem : IFileSystem
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<FileSystemPath> GetEntityPaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetEntitiesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        return FileSystem.GetEntityPaths(path);
+        return FileSystem.GetEntitiesInDirectory(directory, filter);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<FileSystemPath> GetDirectoryPaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetDirectoriesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        return FileSystem.GetDirectoryPaths(path);
+        return FileSystem.GetDirectoriesInDirectory(directory, filter);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<FileSystemPath> GetFilePaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetFilesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        return FileSystem.GetFilePaths(path);
+        return FileSystem.GetFilesInDirectory(directory, filter);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -47,25 +47,28 @@ public class ReadOnlyFileSystem : IFileSystem
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Stream OpenFile(FileSystemPath path, FileAccess access)
+    public Stream OpenFile(FileSystemPath path, FileMode mode = FileMode.Open, FileAccess access = FileAccess.Read)
     {
         if (access != FileAccess.Read)
-            throw new InvalidOperationException("This is a read-only filesystem.");
-        return FileSystem.OpenFile(path, access);
+            throw new UnauthorizedAccessException("This is a read-only filesystem.");
+        return FileSystem.OpenFile(path, mode, access);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Stream CreateFile(FileSystemPath path)
     {
-        throw new InvalidOperationException("This is a read-only filesystem.");
+        throw new UnauthorizedAccessException("This is a read-only filesystem.");
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void CreateDirectory(FileSystemPath path)
     {
-        throw new InvalidOperationException("This is a read-only filesystem.");
+        throw new UnauthorizedAccessException("This is a read-only filesystem.");
     }
 
-    public void Delete(FileSystemPath path)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Delete(FileSystemPath path, DeleteMode mode = DeleteMode.TopMostLayer)
     {
-        throw new InvalidOperationException("This is a read-only filesystem.");
+        throw new UnauthorizedAccessException("This is a read-only filesystem.");
     }
 }

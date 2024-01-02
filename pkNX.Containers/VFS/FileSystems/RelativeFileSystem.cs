@@ -31,23 +31,23 @@ public class RelativeFileSystem : IFileSystem
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<FileSystemPath> GetEntityPaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetEntitiesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        return FileSystem.GetEntityPaths(ToAbsolutePath(path))
+        return FileSystem.GetEntitiesInDirectory(ToAbsolutePath(directory), filter)
             .Select(p => ToRelativePath(p));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<FileSystemPath> GetDirectoryPaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetDirectoriesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        return FileSystem.GetDirectoryPaths(ToAbsolutePath(path))
+        return FileSystem.GetDirectoriesInDirectory(ToAbsolutePath(directory), filter)
             .Select(p => ToRelativePath(p));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<FileSystemPath> GetFilePaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetFilesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        return FileSystem.GetFilePaths(ToAbsolutePath(path))
+        return FileSystem.GetFilesInDirectory(ToAbsolutePath(directory), filter)
             .Select(p => ToRelativePath(p));
     }
 
@@ -58,9 +58,9 @@ public class RelativeFileSystem : IFileSystem
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Stream OpenFile(FileSystemPath path, FileAccess access)
+    public Stream OpenFile(FileSystemPath path, FileMode mode = FileMode.Open, FileAccess access = FileAccess.Read)
     {
-        return FileSystem.OpenFile(ToAbsolutePath(path), access);
+        return FileSystem.OpenFile(ToAbsolutePath(path), mode, access);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,8 +76,8 @@ public class RelativeFileSystem : IFileSystem
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Delete(FileSystemPath path)
+    public void Delete(FileSystemPath path, DeleteMode mode = DeleteMode.TopMostLayer)
     {
-        FileSystem.Delete(ToAbsolutePath(path));
+        FileSystem.Delete(ToAbsolutePath(path), mode);
     }
 }

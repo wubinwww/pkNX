@@ -9,17 +9,17 @@ namespace pkNX.WinForms;
 
 public partial class EvolutionRow8a : UserControl
 {
-    public static string[] items = Array.Empty<string>();
-    public static string[] movelist = Array.Empty<string>();
-    public static string[] species = Array.Empty<string>();
-    public static string[] types = Array.Empty<string>();
+    public static string[] items = [];
+    public static string[] movelist = [];
+    public static string[] species = [];
+    public static string[] types = [];
 
     private static readonly string[] EvoMethods = Enum.GetNames(typeof(EvolutionType));
     private static readonly string[] Levels = Enumerable.Range(0, 100 + 1).Select(z => z.ToString()).ToArray();
     private static readonly string[] Stats = Enumerable.Range(0, 255 + 1).Select(z => z.ToString()).ToArray();
     private static readonly string[] None = { "" };
 
-    private EvolutionEntry? current;
+    private Structures.FlatBuffers.Arceus.EvolutionEntry? current;
     private EvolutionTypeArgumentType oldMethod;
 
     public EvolutionRow8a()
@@ -56,7 +56,7 @@ public partial class EvolutionRow8a : UserControl
 
     private void ChangeSpecies(int spec, int form) => PB_Preview.Image = SpriteUtil.GetSprite((ushort)spec, (byte)form, 0, 0, 0, false, PKHeX.Core.Shiny.Never);
 
-    public void LoadEvolution(EvolutionEntry s)
+    public void LoadEvolution(Structures.FlatBuffers.Arceus.EvolutionEntry s)
     {
         var evo = current = s;
         CB_Species.SelectedIndex = evo.Species;

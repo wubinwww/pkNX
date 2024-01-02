@@ -9,9 +9,9 @@ namespace pkNX.Containers;
 
 public class FolderContainer : IFileContainer
 {
-    private readonly List<string> Paths = new();
-    private readonly List<byte[]?> Data = new();
-    private readonly List<bool> TrackModify = new();
+    private readonly List<string> Paths = [];
+    private readonly List<byte[]?> Data = [];
+    private readonly List<bool> TrackModify = [];
 
     public string? FilePath { get; set; }
 
@@ -33,6 +33,7 @@ public class FolderContainer : IFileContainer
         IEnumerable<string> files = Directory.GetFiles(FilePath, "*", SearchOption.AllDirectories);
         if (filter != null)
             files = files.Where(filter);
+        files = files.OrderBy(z => Path.GetFileName(z).Length); // alphabetical sorting doesn't play nice with 100 & 1000
 
         AddFiles(files);
     }
@@ -122,7 +123,7 @@ public class FolderContainer : IFileContainer
         }
     }
 
-    public void Dump(string path, ContainerHandler handler)
+    public void Dump(string? path = null, ContainerHandler? handler = null)
     {
         SaveAll(); // there's really nothing to dump, just save any modified
     }

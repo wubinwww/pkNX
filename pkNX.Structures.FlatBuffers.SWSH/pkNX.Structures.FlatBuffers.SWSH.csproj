@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -11,17 +11,24 @@
     <ProjectReference Include="..\pkNX.Structures\pkNX.Structures.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FlatSharp.Runtime" Version="7.1.1" />
-    <PackageReference Include="FlatSharp.Compiler" Version="7.1.1">
+    <PackageReference Include="FlatSharp.Runtime" Version="7.4.0" />
+    <PackageReference Include="FlatSharp.Compiler" Version="7.4.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
+  <PropertyGroup>
+    <FlatSharpDeserializers>GreedyMutable</FlatSharpDeserializers>
+    <FlatSharpInputFilesOnly>true</FlatSharpInputFilesOnly>
+  </PropertyGroup>
+  
   <ItemGroup>
-    <FlatSharpSchema Include="Schemas\**\*.fbs" />
+    <FlatSharpSchema Include="Schemas\**\*.fbs">
+      <IncludePath>..\pkNX.Structures.FlatBuffers\Schemas\</IncludePath>
+    </FlatSharpSchema>
   </ItemGroup>
-
+  
   <ItemGroup>
     <Content Include="Schemas\**\*.fbs" />
   </ItemGroup>

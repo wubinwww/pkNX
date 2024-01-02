@@ -21,7 +21,7 @@ public class GameManagerPLA : GameManager
     /// </summary>
     public GameData8a Data { get; protected set; } = null!;
 
-    public VirtualFileSystem VFS { get; private set; }
+    public VirtualFileSystem VFS { get; private set; } = null!;
 
     protected override void SetMitm()
     {
@@ -33,13 +33,11 @@ public class GameManagerPLA : GameManager
         var redirect = Path.Combine(basePath, tid);
         FileMitm.SetRedirect(basePath, redirect);
 
-        // VFS test
         var cleanRomFS = new PhysicalFileSystem(basePath + "/romfs/").AsReadOnlyFileSystem();
         var moddedRomFS = new PhysicalFileSystem(redirect + "/romfs/");
 
         var layeredFS = new LayeredFileSystem(moddedRomFS, cleanRomFS);
         VFS = new VirtualFileSystem(new MountPoint("/romfs/", layeredFS));
-        using var file = VFS.OpenFile("/romfs/bin/pokemon/data/poke_ai.bin", FileAccess.Read);
     }
 
     public override void Initialize()
@@ -55,7 +53,7 @@ public class GameManagerPLA : GameManager
         ItemConverter.ItemNames = GetStrings(TextName.ItemNames);
 
         // TODO: Get these from files
-        AIBehaviourConverter.BehaviourNames = new HashSet<string> {
+        AIBehaviourConverter.BehaviourNames = [
             "",
             "group_leader_wild_poke_coward_lv1",
             "group_leader_wild_poke_coward_lv1_fish_pm0550",
@@ -181,7 +179,7 @@ public class GameManagerPLA : GameManager
             "semi_legend_poke_pm0642",
             "semi_legend_poke_pm0645",
             "semi_legend_poke_pm0905",
-        };
+        ];
     }
 
     private void ResetData()

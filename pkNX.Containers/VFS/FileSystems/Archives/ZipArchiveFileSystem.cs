@@ -9,83 +9,69 @@ namespace pkNX.Containers.VFS;
 public class ZipArchiveFileSystem : IFileSystem
 {
     public ZipArchive ZipArchive { get; }
-
     public bool IsReadOnly => false;
+    private ZipArchiveFileSystem(ZipArchive archive) => ZipArchive = archive;
 
-    public static ZipArchiveFileSystem Open(Stream s)
-    {
-        return new ZipArchiveFileSystem(new ZipArchive(s, ZipArchiveMode.Update, true));
-    }
+    public static ZipArchiveFileSystem Open(Stream s) => new(new ZipArchive(s, ZipArchiveMode.Update, true));
+    public static ZipArchiveFileSystem Create(Stream s) => new(new ZipArchive(s, ZipArchiveMode.Create, true));
 
-    public static ZipArchiveFileSystem Create(Stream s)
-    {
-        return new ZipArchiveFileSystem(new ZipArchive(s, ZipArchiveMode.Create, true));
-    }
+    public void Dispose() => ZipArchive.Dispose();
 
-    private ZipArchiveFileSystem(ZipArchive archive)
-    {
-        ZipArchive = archive;
-    }
-    public void Dispose()
-    {
-        ZipArchive.Dispose();
-    }
+    protected IEnumerable<ZipArchiveEntry> GetZipEntries() => ZipArchive.Entries;
 
-    protected IEnumerable<ZipArchiveEntry> GetZipEntries()
-    {
-        return ZipArchive.Entries;
-    }
-    protected FileSystemPath ToPath(ZipArchiveEntry entry)
-    {
-        return FileSystemPath.Parse(FileSystemPath.DirectorySeparator + entry.FullName);
-    }
-    protected string ToEntryPath(FileSystemPath path)
-    {
-        // Remove heading '/' from path.
-        return path.Path.TrimStart(FileSystemPath.DirectorySeparator);
-    }
+    protected FileSystemPath ToPath(ZipArchiveEntry entry) => FileSystemPath.Parse(FileSystemPath.DirectorySeparator + entry.FullName);
 
-    protected ZipArchiveEntry? ToEntry(FileSystemPath path)
-    {
-        return ZipArchive.GetEntry(ToEntryPath(path));
-    }
+    // Remove heading '/' from path.
+    protected string ToEntryPath(FileSystemPath path) => path.Path.TrimStart(FileSystemPath.DirectorySeparator);
 
-    public IEnumerable<FileSystemPath> GetEntityPaths(FileSystemPath path)
+    protected ZipArchiveEntry? ToEntry(FileSystemPath path) => ZipArchive.GetEntry(ToEntryPath(path));
+
+    public IEnumerable<FileSystemPath> GetEntitiesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        return GetZipEntries()
-            .Select(ToPath)
-            .Where(path.IsParentOf)
-            .Select(entryPath => entryPath.ParentPath == path
+        var entries = GetZipEntries().Select(ToPath).Where(directory.IsParentOf);
+
+        if (filter != null)
+            entries = entries.Where(filter);
+
+        return entries.Select(entryPath => entryPath.ParentPath == directory
                 ? entryPath
-                : path.AppendDirectory(entryPath.MakeRelativeTo(path).GetDirectorySegments().First()))
+                : directory.AppendDirectory(entryPath.MakeRelativeTo(directory).GetDirectorySegments().First()))
             .Distinct();
     }
 
-    public IEnumerable<FileSystemPath> GetDirectoryPaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetDirectoriesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        if (!path.IsDirectory)
-            throw new ArgumentException("This FileSystemPath is not a directory.", nameof(path));
+        if (!directory.IsDirectory)
+            throw new ArgumentException("This FileSystemPath is not a directory.", nameof(directory));
 
-        return GetZipEntries()
+        var entries = GetZipEntries()
             .Select(ToPath)
-            .Where(p => path.IsParentOf(p) && p.IsDirectory)
-            .Select(entryPath => entryPath.ParentPath == path
-                ? entryPath
-                : path.AppendDirectory(entryPath.MakeRelativeTo(path).GetDirectorySegments().First()))
+            .Where(p => directory.IsParentOf(p) && p.IsDirectory);
+
+        if (filter != null)
+            entries = entries.Where(filter);
+
+        return entries.Select(entryPath =>
+                entryPath.ParentPath == directory ? entryPath :
+                directory.AppendDirectory(entryPath.MakeRelativeTo(directory).GetDirectorySegments().First()))
             .Distinct();
     }
 
-    public IEnumerable<FileSystemPath> GetFilePaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetFilesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        if (!path.IsDirectory)
-            throw new ArgumentException("The specified path is not a directory.", nameof(path));
+        if (!directory.IsDirectory)
+            throw new ArgumentException("The specified path is not a directory.", nameof(directory));
 
-        return GetZipEntries()
+        var entries = GetZipEntries()
             .Select(ToPath)
-            .Where(p => path.IsParentOf(p) && p.IsFile)
-            .Select(entryPath => entryPath.ParentPath == path
+            .Where(p => directory.IsParentOf(p) && p.IsFile);
+
+        if (filter != null)
+            entries = entries.Where(filter);
+
+        return entries.Select(entryPath => entryPath.ParentPath == directory
                 ? entryPath
-                : path.AppendDirectory(entryPath.MakeRelativeTo(path).GetDirectorySegments().First()))
+                : directory.AppendDirectory(entryPath.MakeRelativeTo(directory).GetDirectorySegments().First()))
             .Distinct();
     }
 
@@ -101,13 +87,13 @@ public class ZipArchiveFileSystem : IFileSystem
 
     public Stream CreateFile(FileSystemPath path)
     {
-        var zae = ZipArchive.CreateEntry(ToEntryPath(path));
-        return zae.Open();
+        ZipArchiveEntry entry = ZipArchive.CreateEntry(ToEntryPath(path));
+        return entry.Open();
     }
 
-    public Stream OpenFile(FileSystemPath path, FileAccess access)
+    public Stream OpenFile(FileSystemPath path, FileMode mode, FileAccess access)
     {
-        var entry = ZipArchive.GetEntry(ToEntryPath(path));
+        ZipArchiveEntry? entry = ZipArchive.GetEntry(ToEntryPath(path));
         return entry?.Open() ?? Stream.Null;
     }
 
@@ -116,9 +102,9 @@ public class ZipArchiveFileSystem : IFileSystem
         ZipArchive.CreateEntry(ToEntryPath(path));
     }
 
-    public void Delete(FileSystemPath path)
+    public void Delete(FileSystemPath path, DeleteMode mode = DeleteMode.TopMostLayer)
     {
-        var entry = ZipArchive.GetEntry(ToEntryPath(path));
-        entry?.Delete();
+        if (ZipArchive.GetEntry(ToEntryPath(path)) is { } x)
+            x.Delete();
     }
 }

@@ -44,9 +44,10 @@ public partial class DumperSV : Form
         System.Media.SystemSounds.Asterisk.Play();
     }
 
-    private void B_DumpMoves_Click(object sender, EventArgs e)
+    private void B_DumpMovesAbilities_Click(object sender, EventArgs e)
     {
         Dumper.DumpMoves();
+        Dumper.DumpAbilities();
         System.Media.SystemSounds.Asterisk.Play();
     }
 
@@ -85,7 +86,8 @@ public partial class DumperSV : Form
 
     private void B_DumpPath_Click(object sender, EventArgs e)
     {
-        using var f = new TextInput();
+        bool Valid(string path) => Game.HasFile(path);
+        using var f = new TextInput(Valid);
         f.ShowDialog();
         if (f.DialogResult != DialogResult.OK)
             return; // cancel
@@ -124,6 +126,16 @@ public partial class DumperSV : Form
             return;
         var path = fbd.SelectedPath;
         Dumper.DumpDistributionRaids(path);
+        System.Media.SystemSounds.Asterisk.Play();
+    }
+
+    private void B_DeliveryOutbreaks_Click(object sender, EventArgs e)
+    {
+        using var fbd = new FolderBrowserDialog();
+        if (fbd.ShowDialog() != DialogResult.OK)
+            return;
+        var path = fbd.SelectedPath;
+        Dumper.DumpDeliveryOutbreaks(path);
         System.Media.SystemSounds.Asterisk.Play();
     }
     #endregion

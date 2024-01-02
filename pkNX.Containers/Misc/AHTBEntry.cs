@@ -26,11 +26,11 @@ public class AHTBEntry
 
     public void Write(BinaryWriter bw)
     {
-        bw.Write(Hash);
-        bw.Write(Name.Length + 1);
+        bw.Write((ulong)Hash);
+        bw.Write((ushort)(Name.Length + 1));
         bw.Write(Name);
         bw.Write((byte)0); // \0 terminator
     }
 
-    public string Summary => $"{Hash:X16}\t{Name}";
+    public override string ToString() => $"0x{Hash:X16}|{Name}";
 }

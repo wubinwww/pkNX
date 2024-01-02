@@ -7,6 +7,26 @@ public interface IFileSystemEntity
     string Name { get; }
     VirtualDirectory ParentDirectory { get; }
 
+    public void CopyTo(IFileSystem destinationFileSystem, FileSystemPath destinationPath)
+    {
+        FileSystem.Copy(Path, destinationFileSystem, destinationPath);
+    }
+
+    public void MoveTo(IFileSystem destinationFileSystem, FileSystemPath destinationPath)
+    {
+        FileSystem.Move(Path, destinationFileSystem, destinationPath);
+    }
+
+    public void Delete(DeleteMode mode = DeleteMode.TopMostLayer)
+    {
+        FileSystem.Delete(Path, mode);
+    }
+
+    public void Exists()
+    {
+        FileSystem.Exists(Path);
+    }
+
     internal static IFileSystemEntity Create(IFileSystem fileSystem, FileSystemPath path)
     {
         if (path.IsFile)
@@ -15,17 +35,3 @@ public interface IFileSystemEntity
         return VirtualDirectory.Create(fileSystem, path);
     }
 }
-
-public static class IFileSystemEntityExtensions
-{
-    public static void Delete(this IFileSystemEntity e)
-    {
-        e.FileSystem.Delete(e.Path);
-    }
-
-    public static void Exists(this IFileSystemEntity e)
-    {
-        e.FileSystem.Exists(e.Path);
-    }
-}
-

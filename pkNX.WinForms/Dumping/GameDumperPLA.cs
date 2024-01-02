@@ -73,7 +73,7 @@ public class GameDumperPLA
         var s = ROM.GetStrings(TextName.SpeciesNames);
 
         var lrd = ROM.GetFile(GameFile.Learnsets)[0];
-        var lr = FlatBufferConverter.DeserializeFrom<pkNX.Structures.FlatBuffers.Arceus.Learnset>(lrd);
+        var lr = FlatBufferConverter.DeserializeFrom<Learnset>(lrd);
         var evd = ROM.GetFile(GameFile.Evolutions)[0];
         var ev = FlatBufferConverter.DeserializeFrom<EvolutionTable>(evd);
         var pt = new PersonalTable8LA(ROM.GetFile(GameFile.PersonalStats));
@@ -115,7 +115,7 @@ public class GameDumperPLA
 
     private void DumpMoveUsers(IPersonalTable pt, Learnset lr)
     {
-        List<string> Users = new();
+        List<string> Users = [];
         var moves = ROM.GetStrings(TextName.MoveNames);
         var spec = ROM.GetStrings(TextName.SpeciesNames);
         var shop = Legal.MoveShop8_LA;
@@ -128,10 +128,10 @@ public class GameDumperPLA
             var filtered = learn.Where(z => ((IPersonalInfoPLA)pt.GetFormEntry(z.Species, (byte)z.Form)).IsPresentInGame);
             var result = filtered.Select(x => GetSpeciesMove(spec, x, move)).ToArray();
 
-            List<string> r = new() { $"{moves[move]}:" };
+            List<string> r = [$"{moves[move]}:"];
             if (isShop)
             {
-                var species = pt.Table.OfType<IPersonalInfoPLA>().Where(z => z.SpecialTutors[0][shopIndex] && z.IsPresentInGame);
+                var species = pt.Table.OfType<IPersonalInfoPLA>().Where(z => z.SpecialTutors[shopIndex] && z.IsPresentInGame);
                 var names = species.Select(z => $"{spec[z.DexIndexNational]}{(z.Form == 0 ? "" : $"-{z.Form}")}");
                 r.Add($"\tTutors: {string.Join(", ", names)}");
             }
@@ -145,7 +145,7 @@ public class GameDumperPLA
         File.WriteAllLines(outname, Users);
     }
 
-    private static string GetSpeciesMove(string[] spec, LearnsetMeta x, int move)
+    private static string GetSpeciesMove(ReadOnlySpan<string> spec, LearnsetMeta x, int move)
     {
         var learnset = x.Arceus.FirstOrDefault(w => w.Move == move);
         var level = learnset is null ? "INVALID" : learnset.Level.ToString();
@@ -304,7 +304,7 @@ public class GameDumperPLA
         var result = new byte[pt.Table.Length][];
         var mastery = new byte[pt.Table.Length][];
         for (int i = 0; i < result.Length; i++)
-            result[i] = mastery[i] = Array.Empty<byte>();
+            result[i] = mastery[i] = [];
 
         var Dupes = new List<(int Species, int Form)>();
         foreach (var e in obj.Table)
@@ -349,7 +349,7 @@ public class GameDumperPLA
         var pt = new PersonalTable8LA(ROM.GetFile(GameFile.PersonalStats));
         var result = new byte[pt.Table.Length][];
         for (int i = 0; i < result.Length; i++)
-            result[i] = Array.Empty<byte>();
+            result[i] = [];
 
         foreach (var e in obj.Table)
         {
@@ -433,7 +433,7 @@ public class GameDumperPLA
         const float bias = 20;
 
         var hexBin = new List<byte[]>();
-        var allSlots = new List<pkNX.Structures.FlatBuffers.Arceus.EncounterSlot>();
+        var allSlots = new List<EncounterSlot>();
         var allSpawners = new List<PlacementSpawner>();
         var allWormholes = new List<PlacementSpawner>();
         var allLocations = new List<PlacementLocation>();
@@ -769,11 +769,11 @@ public class GameDumperPLA
     public void DumpOutbreak()
     {
         var file = ROM.GetFile(GameFile.Outbreak).FilePath;
-        var result = FlatDumper.GetTable<MassOutbreakTable, MassOutbreak>(file!, z=>z.Table);
+        var result = FlatDumper.GetTable<MassOutbreakTable, MassOutbreak>(file!, z => z.Table);
         File.WriteAllText(GetPath("massOutbreak.txt"), result);
 
         var arr = FlatBufferConverter.DeserializeFrom<MassOutbreakTable>(file!).Table;
-        var cache = new DataCache<MassOutbreak>(arr);
+        var cache = new DataCache<MassOutbreak>(arr!);
         var names = Enumerable.Range(0, cache.Length).Select(z => $"{z}").ToArray();
         var form = new GenericEditor<MassOutbreak>(cache, names, "Outbreak");
         form.ShowDialog();
@@ -799,7 +799,7 @@ public class GameDumperPLA
         var pt = new PersonalTable8LA(ROM.GetFile(GameFile.PersonalStats));
         var result = new byte[pt.Table.Max(p => p.DexIndexRegional)][];
         for (int i = 0; i < result.Length; i++)
-            result[i] = Array.Empty<byte>();
+            result[i] = [];
 
         ushort GetDexIndex(ushort species)
         {
@@ -989,7 +989,7 @@ public class GameDumperPLA
     private void ChangeLanguage(int index)
     {
         ROM.Language = index;
-        ROM.ResetText();
+        GamePath.Initialize(ROM.Game, ROM.Language);
     }
 
     public void DumpStrings()
@@ -1037,7 +1037,7 @@ public class GameDumperPLA
     public void DumpScriptID()
     {
         var file = Path.Combine(ROM.PathRomFS, "bin", "event", "script_id_record_release.bin");
-        var text = FlatDumper.GetTable<ScriptIDRecordRelease, ScriptIDRecord>(file, z=> z.Table);
+        var text = FlatDumper.GetTable<ScriptIDRecordRelease, ScriptIDRecord>(file, z => z.Table);
         var path = GetPath("scriptCommands.txt");
         File.WriteAllText(path, text);
     }
@@ -1084,7 +1084,7 @@ public class GameDumperPLA
     public void DumpMoveShop()
     {
         var file = ROM.GetFile(GameFile.MoveShop).FilePath;
-        var result = FlatDumper.GetTable<MoveShopTable, MoveShopIndex>(file!, z=>z.Table);
+        var result = FlatDumper.GetTable<MoveShopTable, MoveShopIndex>(file!, z => z.Table);
         File.WriteAllText(GetPath("MoveShop.csv"), result);
     }
 }

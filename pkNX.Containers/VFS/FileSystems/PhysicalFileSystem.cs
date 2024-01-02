@@ -42,27 +42,37 @@ public class PhysicalFileSystem : IFileSystem
         return FileSystemPath.Parse(virtualPath);
     }
 
-    public IEnumerable<FileSystemPath> GetEntityPaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetEntitiesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        return GetDirectoryPaths(path).Concat(GetFilePaths(path));
+        return GetDirectoriesInDirectory(directory, filter).Concat(GetFilesInDirectory(directory, filter));
     }
 
-    public IEnumerable<FileSystemPath> GetDirectoryPaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetDirectoriesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        if (!path.IsDirectory)
-            throw new ArgumentException("This FileSystemPath is not a directory.", nameof(path));
+        if (!directory.IsDirectory)
+            throw new ArgumentException("This FileSystemPath is not a directory.", nameof(directory));
 
-        var physicalPaths = Directory.GetDirectories(GetPhysicalPath(path));
-        return physicalPaths.Select(GetVirtualDirectoryPath);
+        var physicalPaths = Directory.GetDirectories(GetPhysicalPath(directory));
+        var virtualPaths = physicalPaths.Select(GetVirtualDirectoryPath);
+
+        if (filter == null)
+            return virtualPaths;
+
+        return virtualPaths.Where(filter);
     }
 
-    public IEnumerable<FileSystemPath> GetFilePaths(FileSystemPath path)
+    public IEnumerable<FileSystemPath> GetFilesInDirectory(FileSystemPath directory, Func<FileSystemPath, bool>? filter = null)
     {
-        if (!path.IsDirectory)
-            throw new ArgumentException("The specified path is not a directory.", nameof(path));
+        if (!directory.IsDirectory)
+            throw new ArgumentException("The specified path is not a directory.", nameof(directory));
 
-        var physicalPaths = Directory.GetFiles(GetPhysicalPath(path));
-        return physicalPaths.Select(GetVirtualFilePath);
+        var physicalPaths = Directory.GetFiles(GetPhysicalPath(directory));
+        var virtualPaths = physicalPaths.Select(GetVirtualFilePath);
+
+        if (filter == null)
+            return virtualPaths;
+
+        return virtualPaths.Where(filter);
     }
 
     public bool Exists(FileSystemPath path)
@@ -78,11 +88,11 @@ public class PhysicalFileSystem : IFileSystem
         return File.Create(GetPhysicalPath(path));
     }
 
-    public Stream OpenFile(FileSystemPath path, FileAccess access)
+    public Stream OpenFile(FileSystemPath path, FileMode mode = FileMode.Open, FileAccess access = FileAccess.Read)
     {
         if (!path.IsFile)
             throw new ArgumentException("The specified path is not a file.", nameof(path));
-        return File.Open(GetPhysicalPath(path), FileMode.Open, access);
+        return File.Open(GetPhysicalPath(path), mode, access);
     }
 
     public void CreateDirectory(FileSystemPath path)
@@ -92,7 +102,7 @@ public class PhysicalFileSystem : IFileSystem
         Directory.CreateDirectory(GetPhysicalPath(path));
     }
 
-    public void Delete(FileSystemPath path)
+    public void Delete(FileSystemPath path, DeleteMode mode = DeleteMode.TopMostLayer)
     {
         if (path.IsFile)
             File.Delete(GetPhysicalPath(path));

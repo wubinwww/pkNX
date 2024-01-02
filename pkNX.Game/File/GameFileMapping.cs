@@ -15,7 +15,7 @@ namespace pkNX.Game;
 /// </summary>
 public class GameFileMapping
 {
-    private readonly Dictionary<GameFile, IFileContainer> Cache = new();
+    private readonly Dictionary<GameFile, IFileContainer> Cache = [];
     private readonly IReadOnlyCollection<GameFileReference> FileMap;
 
     public readonly ContainerHandler ProgressTracker = new();
@@ -232,6 +232,7 @@ public class GameFileMapping
 
         new(ArchiveFolder                         , "bin", "archive"),
         new(PokemonArchiveFolder                  , "bin", "archive", "pokemon"),
+        new(Debug_SWSHPokemonArchiveFolder        , "bin", "archive", "pokemon", "SWSH"),
         new(Resident               , GameFreakPack, "bin", "archive", "field", "resident_release.gfpak"),
         new(archive_contents       , SingleFile   , "bin", "archive", "archive_contents.bin"),
 

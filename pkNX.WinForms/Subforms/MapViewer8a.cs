@@ -84,7 +84,7 @@ public partial class MapViewer8a : Form
         UpdateMap(CB_Map.SelectedIndex, index);
     }
 
-    private List<AreaDef> Defs = new();
+    private List<AreaDef> Defs = [];
 
     private static string GetMapImagePath(AreaInstance area)
     {
@@ -239,8 +239,7 @@ public partial class MapViewer8a : Form
                 ConditionArg5 = string.Empty,
             },
             Oybn = new(),
-
-        }
+        },
     };
 
     private void MapViewer8a_MouseMove(object sender, MouseEventArgs e)
@@ -275,12 +274,12 @@ public class AreaDef
     public readonly string NameSummary;
     public readonly int Min;
     public readonly int Max;
-    public readonly pkNX.Structures.FlatBuffers.Arceus.Vec3f Position;
+    public readonly pkNX.Structures.FlatBuffers.Vec3f Position;
     public readonly SpawnerType Type;
     public readonly IList<EncounterSlot> Slots;
     public readonly float Radius;
 
-    public AreaDef(string NameSummary, int min, int max, pkNX.Structures.FlatBuffers.Arceus.Vec3f position, SpawnerType type, IList<EncounterSlot> slots, float radius)
+    public AreaDef(string NameSummary, int min, int max, pkNX.Structures.FlatBuffers.Vec3f position, SpawnerType type, IList<EncounterSlot> slots, float radius)
     {
         this.NameSummary = NameSummary;
         Min = min;

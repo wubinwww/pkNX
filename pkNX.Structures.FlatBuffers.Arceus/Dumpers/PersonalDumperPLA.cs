@@ -58,7 +58,7 @@ public class PersonalDumperPLA
         var lines = new List<string>();
         var ml = new List<string>[Moves.Count];
         for (int i = 0; i < ml.Length; i++)
-            ml[i] = new List<string>();
+            ml[i] = [];
         MoveSpeciesLearn = ml;
 
         for (ushort species = 0; species <= table.MaxSpeciesID; species++)
@@ -130,7 +130,7 @@ public class PersonalDumperPLA
 
     protected virtual void AddArmorTutors(List<string> lines, IMovesInfo_B2W2 pi, string SpecCode)
     {
-        var shop = pi.SpecialTutors[0];
+        var shop = pi.SpecialTutors;
         int count = 0;
         lines.Add("Move Shop:");
         for (int i = 0; i < Math.Min(shop.Length, Legal.MoveShop8_LA.Length); i++)
